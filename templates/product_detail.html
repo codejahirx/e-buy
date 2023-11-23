@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  {{ products.name }}
+{% endblock %}
+
+{% block productdetail %}
+  <div class="container mt-4 pt-4">
+    <div class="row">
+      <div class="col-lg-5">
+        <img src="{{ products.image.url }}" alt="Product Image" class="img-fluid mx-auto d-block mb-4" />
+      </div>
+      <div class="col-lg-7">
+        <h1>{{ products.name }}</h1><br />
+        <h5>Price: Rs. {{ products.price }}</h5><br />
+        <p>{{ products.description|truncatechars:200 }}</p>
+        {% if in_cart %}
+          <a class="btn btn-success" href="{% url 'show_cart' %}">Go to cart</a>
+        {% else %}
+          <form action="/add-cart" class="mb-4">
+            <input type="hidden" name="prod_id" id="prod_id" value="{{ products.id }}" />
+            <button type="submit" class="btn btn-primary">Add to Cart</button>
+          </form>
+        {% endif %}
+
+        {% if in_wishlist %}
+          <a class="btn btn-success" href="{% url 'wishlist' %}">Go to wishlist</a>
+        {% else %}
+          <form action="/add-to-wishlist" class="mb-4 mt-2">
+            <input type="hidden" name="wishlist" id="wishlist" value="{{ products.id }}" />
+            <button type="submit" class="btn btn-secondary"><i class="fas fa-plus"></i> Add to Wishlist</button>
+          </form>
+        {% endif %}
+
+        <h5>Category:</h5>
+        <ul class="list-unstyled">
+          {% for cat in products.category.all %}
+            <li>{{ cat.name }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <h2>Description</h2>
+        <p>{{ products.description }}</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

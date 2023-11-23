@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  My Addresses
+{% endblock %}
+
+{% block content %}
+  <div class="row mt-4 pt-4 pb-3">
+    <div class="col-md-4">
+      <div class="address-card p-3 shadow">
+        <h2>Add Shipping Address</h2>
+
+        <form action="" method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+
+        {% if messages %}
+          <div class="alert alert-info mt-3">
+            <ul>
+              {% for message in messages %}
+                <li>{{ message }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="address-list">
+        <h2 class="text-center mt-3">Shipping Addresses</h2><br /><br />
+        <div class="row">
+          {% if alladdress %}
+            {% for address in alladdress %}
+              <div class="col-6">
+                <div class="card mb-4 shadow">
+                  <div class="card-body">
+                    <h5 class="card-title">Addresses : {{ forloop.counter }}</h5>
+                    <p class="card-title">Name : {{ address.name }}</p>
+                    <p class="card-text">Phone : {{ address.phone }}</p>
+                    <p class="card-text">Street : {{ address.street }}</p>
+                    <p class="card-text">City :{{ address.city }} - {{ address.zipcode }}</p>
+                    <p class="card-text">State :{{ address.state }}</p>
+                    <a class="btn btn-danger" href="{% url 'del_add' address.id %}">Remove</a>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="col text-center m-4">
+              <i><h3>No addresses yet!</h3></i>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

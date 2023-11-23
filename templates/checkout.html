@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}
+  e-App
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-8">
+      <div class="row">
+        <div class="col">
+          <h2 class="mt-4 mb-4">Cart Summary</h2>
+
+          {% for cart in cart_items %}
+            <div class="mb-3">
+              <strong>{{ cart.product.name }}</strong><br />
+              Quantity: {{ cart.quantity }} <br />
+              Price: {{ cart.total_price }}
+            </div>
+          {% endfor %}
+
+          <div class="mt-4">
+            <strong>Total Price - {{ total_amount_with_shipping }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <div class="row">
+        <div class="col">
+          <h2 class="mt-4 mb-4">Select Shipping Addresses</h2>
+          <form action="/paymentdone" id="myform">
+            {% for address in alladdresses %}
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="radio" name="addid" id="address{{ forloop.counter }}" value="{{ address.id }}" />
+                <label class="form-check-label" for="address{{ forloop.counter }}">{{ address.name }}, {{ address.phone }}, {{ address.street }}, {{ address.city }}, {{ address.state }} - {{ address.zipcode }}</label>
+              </div>
+            {% endfor %}
+
+            <div class="row">
+              <div class="col">
+                <h2 class="mt-4">Order Details</h2>
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Description</th>
+                        <th scope="col">Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Subtotal</td>
+                        <td>Rs.{{ total_amount }}</td>
+                      </tr>
+                      <tr>
+                        <td>Delivery Charges</td>
+                        <td>Rs.{{ shipping_charge }}</td> <!-- You can replace this with the actual shipping charge -->
+                      </tr>
+                      <tr>
+                        <td>
+                          <b>Order Total</b>
+                        </td>
+                        <td>
+                          <b>Rs.{{ total_amount_with_shipping }}</b>
+                        </td> <!-- You can replace this with the actual total amount -->
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            {% comment %} <button type="submit" class="btn btn-primary mt-3">Continue</button> {% endcomment %}
+            {% if alladdresses %}
+              <div id="paypal-button-container"></div>
+            {% else %}
+              <p>
+                <b>NOTE</b> : Please add or select a shipping address to continue payment
+              </p>
+              <div class="row justify-content-center">
+                <div class="col-auto">
+                  <a class="btn btn-primary" href="{% url 'address' %}">Add shipping address</a>
+                </div>
+              </div>
+            {% endif %}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block paymentgateway %}
+  <!-- Include the PayPal JavaScript SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=#yourkey#&currency=USD"></script>
+
+  <script>
+    // Render the PayPal button into #paypal-button-container
+    paypal
+      .Buttons({
+        // Set up the transaction
+        createOrder: function (data, actions) {
+          return actions.order.create({
+            purchase_units: [
+              {
+                amount: {
+                  value: '{{ total_amount_with_shipping }}'
+                }
+              }
+            ]
+          })
+        },
+    
+        // Finalize the transaction
+        onApprove: function (data, actions) {
+          return actions.order.capture().then(function (details) {
+            // Show a success message to the buyer
+            alert('Transaction completed by ' + details.payer.name.given_name + '!')
+            document.getElementById('myform').submit()
+          })
+        }
+      })
+      .render('#paypal-button-container')
+  </script>
+{% endblock %}
